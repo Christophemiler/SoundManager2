@@ -3480,19 +3480,7 @@ function SoundManager(smURL, smID) {
   };
 
   _debugTS = function(sEventType, bSuccess, sMessage) {
-
-    // troubleshooter debug hooks
-
-    if (typeof sm2Debugger !== 'undefined') {
-      try {
-        sm2Debugger.handleEvent(sEventType, bSuccess, sMessage);
-      } catch(e) {
-        // oh well
-      }
-    }
-
     return true;
-
   };
   // </d>
 
@@ -4504,12 +4492,6 @@ function SoundManager(smURL, smID) {
   }
 
 } // SoundManager()
-
-// SM2_DEFER details: http://www.schillmania.com/projects/soundmanager2/doc/getstarted/#lazy-loading
-
-if (typeof SM2_DEFER === 'undefined' || !SM2_DEFER) {
-  soundManager = new SoundManager();
-}
 
 /**
  * SoundManager public interfaces
