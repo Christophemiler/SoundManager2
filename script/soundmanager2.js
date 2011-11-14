@@ -28,6 +28,8 @@
  * debug blocks which are removed in the -nodebug builds, further optimizing code size.
  */
 
+goog.provide('sm2.SoundManager');
+
 (function(window) {
 
 var soundManager = null;
@@ -4513,8 +4515,7 @@ if (typeof SM2_DEFER === 'undefined' || !SM2_DEFER) {
  * SoundManager public interfaces
  * ------------------------------
  */
-
-window.SoundManager = SoundManager; // constructor
-window.soundManager = soundManager; // public API, flash callbacks etc.
+ // public API, flash callbacks etc.
+sm2.SoundManager = SoundManager;
 
 }(window));
