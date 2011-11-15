@@ -70,6 +70,11 @@ sm2.SoundManager = function(smURL, smID) {
      * multiple MIME types may be tested while trying to get a positive canPlayType() response.
      */
 
+    'ogg': {
+      'type': ['audio/ogg; codecs=vorbis'],
+      'required': true
+    },
+
     'mp3': {
       'type': ['audio/mpeg; codecs="mp3"', 'audio/mpeg', 'audio/mp3', 'audio/MPA', 'audio/mpa-robust'],
       'required': true
@@ -80,11 +85,6 @@ sm2.SoundManager = function(smURL, smID) {
       'type': ['audio/mp4; codecs="mp4a.40.2"', 'audio/aac', 'audio/x-m4a', 'audio/MP4A-LATM', 'audio/mpeg4-generic'],
       'required': false
 
-    },
-
-    'ogg': {
-      'type': ['audio/ogg; codecs=vorbis'],
-      'required': false
     },
 
     'wav': {
@@ -4007,6 +4007,7 @@ sm2.SoundManager = function(smURL, smID) {
               'width': '8px',
               'height': '8px',
               // >= 6px for flash to run fast, >= 8px to start up under Firefox/win32 in some cases. odd? yes.
+
               'bottom': '0px',
               'left': '0px',
               'overflow': 'hidden'
