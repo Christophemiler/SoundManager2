@@ -28,26 +28,21 @@
  * debug blocks which are removed in the -nodebug builds, further optimizing code size.
  */
 
+/**
+ * @fileoverview This is a file where all warning checks are disabled.
+ * @suppress {checkTypes||accessControls||checkVars||fileoverviewTags||globalThis||invalidCasts||missingProperties||constantProperty||deprecated||nonStandardJsDocs||strictModuleDepCheck||unknownDefines||uselessCode||visibility}
+ */
 goog.provide('sm2.SoundManager');
-
-(function(window) {
-
-var soundManager = null;
 
 /**
  * The SoundManager constructor.
- *
  * @constructor
- * @param {string} smURL Optional: Path to SWF files
- * @param {string} smID Optional: The ID to use for the SWF container element
- * @this {SoundManager}
- * @return {SoundManager} The new SoundManager instance
+ * @param {string=} smURL Optional: Path to SWF files
+ * @param {string=} smID Optional: The ID to use for the SWF container element
  */
-
-function SoundManager(smURL, smID) {
+sm2.SoundManager = function(smURL, smID) {
 
   // Top-level configuration options
-
   this.flashVersion = 8;             // version of flash to require, either 8 or 9. Some API features require Flash 9.
   this.debugMode = true;             // enable debugging output (div#soundmanager-debug, OR console if available+configured)
   this.debugFlash = false;           // enable debugging output inside SWF, troubleshoot Flash/browser issues
@@ -329,8 +324,8 @@ function SoundManager(smURL, smID) {
   /**
    * Creates a SMSound sound object instance.
    *
-   * @param {object} oOptions Sound options (at minimum, id and url are required.)
-   * @return {object} SMSound The new SMSound object.
+   * @param {Object} oOptions Sound options (at minimum, id and url are required.)
+   * @return {Object} SMSound The new SMSound object.
    */
 
   this.createSound = function(oOptions) {
@@ -487,7 +482,7 @@ function SoundManager(smURL, smID) {
    * Calls the load() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @param {object} oOptions Optional: Sound options
+   * @param {Object} oOptions Optional: Sound options
    */
 
   this.load = function(sID, oOptions) {
@@ -520,9 +515,9 @@ function SoundManager(smURL, smID) {
    *
    * @param {string} sID The ID of the sound
    * @param {number} nPosition The position to watch for
-   * @param {function} oMethod The relevant callback to fire
-   * @param {object} oScope Optional: The scope to apply the callback to
-   * @return {SMSound} The SMSound object
+   * @param {Function} oMethod The relevant callback to fire
+   * @param {Object} oScope Optional: The scope to apply the callback to
+   * @return The SMSound object
    */
 
   this.onposition = function(sID, nPosition, oMethod, oScope) {
@@ -538,8 +533,8 @@ function SoundManager(smURL, smID) {
    * Calls the play() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @param {object} oOptions Optional: Sound options
-   * @return {SMSound} The SMSound object
+   * @param {Object} oOptions Optional: Sound options
+   * @return The SMSound object
    */
 
   this.play = function(sID, oOptions) {
@@ -578,7 +573,7 @@ function SoundManager(smURL, smID) {
    *
    * @param {string} sID The ID of the sound
    * @param {number} nMsecOffset Position (milliseconds)
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.setPosition = function(sID, nMsecOffset) {
@@ -595,7 +590,7 @@ function SoundManager(smURL, smID) {
    * Calls the stop() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.stop = function(sID) {
@@ -630,7 +625,7 @@ function SoundManager(smURL, smID) {
    * Calls the pause() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return The SMSound object
    */
 
   this.pause = function(sID) {
@@ -659,7 +654,7 @@ function SoundManager(smURL, smID) {
    * Calls the resume() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return The SMSound object
    */
 
   this.resume = function(sID) {
@@ -688,7 +683,7 @@ function SoundManager(smURL, smID) {
    * Calls the togglePause() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return The SMSound object
    */
 
   this.togglePause = function(sID) {
@@ -705,7 +700,7 @@ function SoundManager(smURL, smID) {
    *
    * @param {string} sID The ID of the sound
    * @param {number} nPan The pan value (-100 to 100)
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.setPan = function(sID, nPan) {
@@ -722,7 +717,7 @@ function SoundManager(smURL, smID) {
    *
    * @param {string} sID The ID of the sound
    * @param {number} nVol The volume value (0 to 100)
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.setVolume = function(sID, nVol) {
@@ -827,7 +822,7 @@ function SoundManager(smURL, smID) {
    * Calls the toggleMute() method of a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.toggleMute = function(sID) {
@@ -940,7 +935,7 @@ function SoundManager(smURL, smID) {
   /**
    * Determines playability of an HTML DOM &lt;a&gt; object (or similar object literal) based on audio support.
    *
-   * @param {object} oLink an HTML DOM &lt;a&gt; object or object literal including href and/or type attributes
+   * @param {Object} oLink an HTML DOM &lt;a&gt; object or object literal including href and/or type attributes
    * @return {boolean} URL playability
    */
 
@@ -960,7 +955,7 @@ function SoundManager(smURL, smID) {
    * Retrieves a SMSound object by ID.
    *
    * @param {string} sID The ID of the sound
-   * @return {SMSound} The SMSound object
+   * @return  The SMSound object
    */
 
   this.getSoundById = function(sID, _suppressDebug) {
@@ -984,10 +979,9 @@ function SoundManager(smURL, smID) {
   /**
    * Queues a callback for execution when SoundManager has successfully initialized.
    *
-   * @param {function} oMethod The callback method to fire
-   * @param {object} oScope Optional: The scope to apply to the callback
+   * @param {Function=} oMethod The callback method to fire
+   * @param {Object=} oScope Optional: The scope to apply to the callback
    */
-
   this.onready = function(oMethod, oScope) {
 
     var sType = 'onready';
@@ -1020,8 +1014,8 @@ function SoundManager(smURL, smID) {
   /**
    * Queues a callback for execution when SoundManager has failed to initialize.
    *
-   * @param {function} oMethod The callback method to fire
-   * @param {object} oScope Optional: The scope to apply to the callback
+   * @param {Function} oMethod The callback method to fire
+   * @param {Object} oScope Optional: The scope to apply to the callback
    */
 
   this.ontimeout = function(oMethod, oScope) {
@@ -1059,7 +1053,7 @@ function SoundManager(smURL, smID) {
    *
    * @param {string} sText The console message
    * @param {string} sType Optional: Log type of 'info', 'warn' or 'error'
-   * @param {object} Optional: The scope to apply to the callback
+   * @param {Object} _bTimestamp Optional: The scope to apply to the callback
    */
 
   this._writeDebug = function(sText, sType, _bTimestamp) {
@@ -1214,7 +1208,7 @@ function SoundManager(smURL, smID) {
   /**
    * Undocumented: Determines the SM2 flash movie's load progress.
    *
-   * @return {number or null} Percent loaded, or if invalid/unsupported, null.
+   * @return {number||null} Percent loaded, or if invalid/unsupported, null.
    */
 
   this.getMoviePercent = function() {
@@ -1265,8 +1259,8 @@ function SoundManager(smURL, smID) {
    * SMSound() (sound object) constructor
    * ------------------------------------
    *
-   * @param {object} oOptions Sound options (id and url are required attributes)
-   * @return {SMSound} The new SMSound object
+   * @param {Object} oOptions Sound options (id and url are required attributes)
+   * @return  The new SMSound object
    */
 
   SMSound = function(oOptions) {
@@ -1338,8 +1332,8 @@ function SoundManager(smURL, smID) {
     /**
      * Begins loading a sound per its *url*.
      *
-     * @param {object} oOptions Optional: Sound options
-     * @return {SMSound} The SMSound object
+     * @param {Object} oOptions Optional: Sound options
+     * @return  The SMSound object
      */
 
     this.load = function(oOptions) {
@@ -1419,7 +1413,7 @@ function SoundManager(smURL, smID) {
     /**
      * Unloads a sound, canceling any open HTTP requests.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.unload = function() {
@@ -1498,8 +1492,8 @@ function SoundManager(smURL, smID) {
     /**
      * Begins playing a sound.
      *
-     * @param {object} oOptions Optional: Sound options
-     * @return {SMSound} The SMSound object
+     * @param {Object} oOptions Optional: Sound options
+     * @return  The SMSound object
      */
 
     this.play = function(oOptions, _updatePlayState) {
@@ -1636,7 +1630,7 @@ function SoundManager(smURL, smID) {
      * Stops playing a sound (and optionally, all sounds)
      *
      * @param {boolean} bAll Optional: Whether to stop all sounds
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.stop = function(bAll) {
@@ -1733,7 +1727,7 @@ function SoundManager(smURL, smID) {
      * Sets the position of a sound.
      *
      * @param {number} nMsecOffset Position (milliseconds)
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.setPosition = function(nMsecOffset) {
@@ -1804,7 +1798,7 @@ function SoundManager(smURL, smID) {
     /**
      * Pauses sound playback.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.pause = function(_bCallFlash) {
@@ -1836,7 +1830,7 @@ function SoundManager(smURL, smID) {
     /**
      * Resumes sound playback.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     /**
@@ -1883,7 +1877,7 @@ function SoundManager(smURL, smID) {
     /**
      * Toggles sound playback.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.togglePause = function() {
@@ -1911,7 +1905,7 @@ function SoundManager(smURL, smID) {
      * Sets the panning (L-R) effect.
      *
      * @param {number} nPan The pan value (-100 to 100)
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.setPan = function(nPan, bInstanceOnly) {
@@ -1943,7 +1937,7 @@ function SoundManager(smURL, smID) {
      * Sets the volume.
      *
      * @param {number} nVol The volume value (0 to 100)
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.setVolume = function(nVol, _bInstanceOnly) {
@@ -1976,7 +1970,7 @@ function SoundManager(smURL, smID) {
     /**
      * Mutes the sound.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.mute = function() {
@@ -1996,7 +1990,7 @@ function SoundManager(smURL, smID) {
     /**
      * Unmutes the sound.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.unmute = function() {
@@ -2017,7 +2011,7 @@ function SoundManager(smURL, smID) {
     /**
      * Toggles the muted state of a sound.
      *
-     * @return {SMSound} The SMSound object
+     * @return  The SMSound object
      */
 
     this.toggleMute = function() {
@@ -2030,9 +2024,9 @@ function SoundManager(smURL, smID) {
      * Calls the onposition() method of a SMSound object.
      *
      * @param {number} nPosition The position to watch for
-     * @param {function} oMethod The relevant callback to fire
-     * @param {object} oScope Optional: The scope to apply the callback to
-     * @return {SMSound} The SMSound object
+     * @param {Function} oMethod The relevant callback to fire
+     * @param {Object} oScope Optional: The scope to apply the callback to
+     * @return  The SMSound object
      */
 
     this.onposition = function(nPosition, oMethod, oScope) {
@@ -3480,7 +3474,10 @@ function SoundManager(smURL, smID) {
   };
 
   _debugTS = function(sEventType, bSuccess, sMessage) {
+
+    // troubleshooter debug hooks
     return true;
+
   };
   // </d>
 
@@ -4491,13 +4488,7 @@ function SoundManager(smURL, smID) {
     setTimeout(_domContentLoaded,100);
   }
 
-} // SoundManager()
+  // The magic trick, for flash to communicate with Javascript.
+  window['soundManager'] = this;
+}; // SoundManager()
 
-/**
- * SoundManager public interfaces
- * ------------------------------
- */
- // public API, flash callbacks etc.
-sm2.SoundManager = SoundManager;
-
-}(window));
