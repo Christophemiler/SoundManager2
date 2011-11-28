@@ -70,26 +70,26 @@ sm2.SoundManager = function(smURL, smID) {
      * multiple MIME types may be tested while trying to get a positive canPlayType() response.
      */
 
-    'ogg': {
-      'type': ['audio/ogg; codecs=vorbis'],
-      'required': true
+    ogg: {
+      type: ['audio/ogg; codecs=vorbis'],
+      required: true
     },
 
-    'mp3': {
-      'type': ['audio/mpeg; codecs="mp3"', 'audio/mpeg', 'audio/mp3', 'audio/MPA', 'audio/mpa-robust'],
-      'required': true
+    mp3: {
+      type: ['audio/mpeg; codecs="mp3"', 'audio/mpeg', 'audio/mp3', 'audio/MPA', 'audio/mpa-robust'],
+      required: true
     },
 
-    'mp4': {
-      'related': ['aac','m4a'], // additional formats under the MP4 container
-      'type': ['audio/mp4; codecs="mp4a.40.2"', 'audio/aac', 'audio/x-m4a', 'audio/MP4A-LATM', 'audio/mpeg4-generic'],
-      'required': false
+    mp4: {
+      related: ['aac','m4a'], // additional formats under the MP4 container
+      type: ['audio/mp4; codecs="mp4a.40.2"', 'audio/aac', 'audio/x-m4a', 'audio/MP4A-LATM', 'audio/mpeg4-generic'],
+      required: false
 
     },
 
-    'wav': {
-      'type': ['audio/wav; codecs="1"', 'audio/wav', 'audio/wave', 'audio/x-wav'],
-      'required': false
+    wav: {
+      type: ['audio/wav; codecs="1"', 'audio/wav', 'audio/wave', 'audio/x-wav'],
+      required: false
     }
 
   };
