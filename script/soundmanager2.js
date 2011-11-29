@@ -4503,18 +4503,11 @@ function SoundManager(smURL, smID) {
 
 } // SoundManager()
 
-// SM2_DEFER details: http://www.schillmania.com/projects/soundmanager2/doc/getstarted/#lazy-loading
-
-if (typeof SM2_DEFER === 'undefined' || !SM2_DEFER) {
-  soundManager = new SoundManager();
-}
-
 /**
  * SoundManager public interfaces
  * ------------------------------
  */
 
 window.SoundManager = SoundManager; // constructor
-window.soundManager = soundManager; // public API, flash callbacks etc.
 
 }(window));
