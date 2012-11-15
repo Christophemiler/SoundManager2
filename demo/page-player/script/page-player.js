@@ -41,7 +41,6 @@ function PagePlayer() {
     useWaveformData: false, // [Flash 9 only]: enable sound spectrum (raw waveform data) - WARNING: CPU-INTENSIVE: may set CPUs on fire.
     useEQData: false,       // [Flash 9 only]: enable sound EQ (frequency spectrum data) - WARNING: Also CPU-intensive.
     fillGraph: false,       // [Flash 9 only]: draw full lines instead of only top (peak) spectrum points
-    useMovieStar: true,     // [Flash 9 only]: Support for MPEG4 audio formats
     allowRightClick: true,  // let users right-click MP3 links ("save as...", etc.) or discourage (can't prevent.)
     useThrottling: true,    // try to rate-limit potentially-expensive calls (eg. dragging position around)
     autoStart: false,       // begin playing first sound when page loads
@@ -390,7 +389,7 @@ function PagePlayer() {
         doWork.apply(this);
       } else {
         var d = new Date();
-        if (d && d-self.lastWLExec>30 || this.bytesLoaded === this.bytesTotal) {
+        if (d && d-self.lastWLExec > 50 || this.bytesLoaded === this.bytesTotal) {
           doWork.apply(this);
           self.lastWLExec = d;
         }
@@ -543,7 +542,7 @@ function PagePlayer() {
   };
   
   this.withinStatusBar = function(o) {
-    return (self.isChildOfClass(o,'controls'));
+    return (self.isChildOfClass(o,'playlist')) && (self.isChildOfClass(o,'controls'));
   };
 
   this.handleClick = function(e) {
@@ -814,10 +813,10 @@ function PagePlayer() {
   };
 
   this.stopSound = function(oSound) {
-    sm._writeDebug('stopping sound: '+oSound.sID);
-    sm.stop(oSound.sID);
+    sm._writeDebug('stopping sound: '+oSound.id);
+    sm.stop(oSound.id);
     if (!isTouchDevice) { // iOS 4.2+ security blocks onfinish() -> playNext() if we set a .src in-between(?)
-      sm.unload(oSound.sID);
+      sm.unload(oSound.id);
     }
   };
 
@@ -938,7 +937,6 @@ function PagePlayer() {
 
     if (sm.flashVersion >= 9) {
 
-      sm.useMovieStar = this.config.useMovieStar; // enable playing FLV, MP4 etc.
       sm.defaultOptions.usePeakData = this.config.usePeakData;
       sm.defaultOptions.useWaveformData = this.config.useWaveformData;
       sm.defaultOptions.useEQData = this.config.useEQData;

@@ -36,7 +36,7 @@ class SoundManager2 {
 
   function SoundManager2() {
 
-    var version = "V2.97a.20111030";
+    var version = "V2.97a.20121104";
     var version_as = "(AS2/Flash 8)";
 
     /**
@@ -139,9 +139,10 @@ class SoundManager2 {
             flashDebug('<br><b>Fatal: Security sandbox error: Got "' + sandboxType + '", expected "remote" or "localTrusted".<br>Additional security permissions need to be granted.<br>See <a href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html">flash security settings panel</a> for non-HTTP, eg. file:// use.</b><br>http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager04.html<br><br>You may also be able to right-click this movie and choose from the menu: <br>"Global Settings" -> "Advanced" tab -> "Trusted Location Settings"<br>');
           }
           var d = new Date();
-          ExternalInterface.call(baseJSController + "._externalInterfaceOK", d.getTime());
+          ExternalInterface.call(baseJSController + "._externalInterfaceOK", d.getTime(), version);
           if (!didSandboxMessage) {
             flashDebug('Flash -&gt; JS OK');
+            flashDebug('Waiting for JS -&gt; Flash...');
           }
         } else {
           writeDebug('SM2 SWF ' + version + ' ' + version_as);
@@ -223,7 +224,8 @@ class SoundManager2 {
       }
     }
 
-    var _setPosition = function(sID, nSecOffset, isPaused) {
+    var _setPosition = function(sID, nSecOffset, isPaused, _allowMultiShot) {
+      // note: multiShot is Flash 9-only; retained so JS/Flash function signatures are identical.
       var s = soundObjects[sID];
       // writeDebug('_setPosition()');
       s.lastValues.position = s.position;
@@ -238,7 +240,7 @@ class SoundManager2 {
     }
 
     var _load = function(sID, sURL, bStream, bAutoPlay, bCheckPolicyFile) {
-      // writeDebug('_load(): '+sID+', '+sURL+', '+bStream+', '+bAutoPlay);
+      // writeDebug('_load(): '+sID+', '+sURL+', '+bStream+', '+bAutoPlay+', '+bCheckPolicyFile);
       if (typeof bAutoPlay == 'undefined') {
         bAutoPlay = false;
       }
@@ -322,16 +324,19 @@ class SoundManager2 {
       }
     }
 
-    var _start = function(sID, nLoops, nMsecOffset) {
+    var _start = function(sID, nLoops, nMsecOffset, _allowMultiShot) {
+      // note: multiShot is Flash 9-only; retained so JS/Flash function signatures are identical.
       // writeDebug('_start: ' + sID + ', loops: ' + nLoops + ', nMsecOffset: ' + nMsecOffset);
       registerOnComplete();
       var s = soundObjects[sID];
       s.lastValues.paused = false; // reset pause if applicable
       s.lastValues.nLoops = (nLoops || 1);
       s.start(nMsecOffset, nLoops);
+      return true;
     }
 
-    var _pause = function(sID) {
+    var _pause = function(sID, _allowMultiShot) {
+       // note: multiShot is Flash 9-only; retained so JS/Flash function signatures are identical.
       // writeDebug('_pause()');
       var s = soundObjects[sID];
       if (!s.paused) {

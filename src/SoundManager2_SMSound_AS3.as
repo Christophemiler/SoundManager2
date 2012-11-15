@@ -150,7 +150,6 @@ package {
       switch (event.info.code) {
 
         case "NetConnection.Connect.Success":
-          writeDebug('NetConnection: connected');
           try {
             this.ns = new NetStream(this.nc);
             this.ns.checkPolicyFile = this.checkPolicyFile;
@@ -158,11 +157,14 @@ package {
             this.ns.bufferTime = this.bufferTime; // set to 0.1 or higher. 0 is reported to cause playback issues with static files.
             this.st = new SoundTransform();
             this.cc.onMetaData = this.metaDataHandler;
+            this.cc.setCaption = this.captionHandler;
             this.ns.client = this.cc;
             this.ns.receiveAudio(true);
             this.addNetstreamEvents();
             this.connected = true;
-            if (this.useEvents) {
+            // RTMP-only
+            if (this.serverUrl && this.useEvents) {
+              writeDebug('NetConnection: connected');
               writeDebug('firing _onconnect for '+this.sID);
               ExternalInterface.call(this.sm.baseJSObject + "['" + this.sID + "']._onconnect", 1);
             }
@@ -229,9 +231,10 @@ package {
     }
 
     public function metaDataHandler(infoObject: Object) : void {
+      var prop:String;
       if (sm.debugEnabled) {
         var data:String = new String();
-        for (var prop:* in infoObject) {
+        for (prop in infoObject) {
           data += prop+': '+infoObject[prop]+' \n';
         }
         writeDebug('Metadata: '+data);
@@ -241,11 +244,41 @@ package {
         // writeDebug('not loaded yet: '+this.ns.bytesLoaded+', '+this.ns.bytesTotal+', '+infoObject.duration*1000);
         // TODO: investigate loaded/total values
         // ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.ns.bytesLoaded, this.ns.bytesTotal, infoObject.duration*1000);
-        ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.bytesLoaded, this.bytesTotal, (infoObject.duration || this.duration))
+        ExternalInterface.call(baseJSObject + "['" + this.sID + "']._whileloading", this.bytesLoaded, this.bytesTotal, (this.duration || infoObject.duration))
       }
+      var metaData:Array = [];
+      var metaDataProps:Array = [];
+      for (prop in infoObject) {
+        metaData.push(prop);
+        metaDataProps.push(infoObject[prop]);
+      }
+      // pass infoObject to _onmetadata, too
+      ExternalInterface.call(baseJSObject + "['" + this.sID + "']._onmetadata", metaData, metaDataProps);
+      // this handler may fire multiple times, eg., when a song changes while playing an RTMP stream.
+      if (!this.serverUrl) {
+        // disconnect for non-RTMP cases, since multiple firings may mess up duration.
+        this.cc.onMetaData = function(infoObject: Object) : void {}
+      }
+    }
+
+    public function captionHandler(infoObject: Object) : void {
+
+      if (sm.debugEnabled) {
+        var data:String = new String();
+        for (var prop:* in infoObject) {
+          data += prop+': '+infoObject[prop]+' \n';
+        }
+        writeDebug('Caption: '+data);
+      }
+
       // null this out for the duration of this object's existence.
       // it may be called multiple times.
-      this.cc.onMetaData = function(infoObject: Object) : void {}
+      // this.cc.setCaption = function(infoObject: Object) : void {}
+    
+      // writeDebug('Caption\n'+infoObject['dynamicMetadata']);
+      // writeDebug('firing _oncaptiondata for '+this.sID);
+
+      ExternalInterface.call(this.sm.baseJSObject + "['" + this.sID + "']._oncaptiondata", infoObject['dynamicMetadata']);
 
     }
 
@@ -267,16 +300,22 @@ package {
       }
     }
 
-    public function start(nMsecOffset: int, nLoops: int) : void {
+    public function start(nMsecOffset: int, nLoops: int, allowMultiShot:Boolean) : Boolean {
+
       this.useEvents = true;
+
       if (this.useNetstream) {
 
         writeDebug("SMSound::start nMsecOffset "+ nMsecOffset+ ' nLoops '+nLoops + ' current bufferTime '+this.ns.bufferTime+' current bufferLength '+this.ns.bufferLength+ ' this.lastValues.position '+this.lastValues.position);
+
+        // mark for later Netstream.Play.Stop / sound completion
+        this.finished = false;
 
         this.cc.onMetaData = this.metaDataHandler;
 
         // Don't seek if we don't have to because it destroys the buffer
         var set_position:Boolean = this.lastValues.position != null && this.lastValues.position != nMsecOffset;
+
         if (set_position) {
           // Minimize the buffer so playback starts ASAP
           this.ns.bufferTime = this.bufferTime;
@@ -316,10 +355,25 @@ package {
 
       } else {
         // writeDebug('start: seeking to '+nMsecOffset+', '+nLoops+(nLoops==1?' loop':' loops'));
-        this.soundChannel = this.play(nMsecOffset, nLoops);
-        this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
-        this.applyTransform();
+        if (!this.soundChannel || allowMultiShot) {
+          this.soundChannel = this.play(nMsecOffset, nLoops);
+          this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
+          this.applyTransform();
+        } else {
+          // writeDebug('start: was already playing, no-multishot case. Seeking to '+nMsecOffset+', '+nLoops+(nLoops==1?' loop':' loops'));
+          // already playing and no multi-shot allowed, so re-start and set position
+          if (this.soundChannel) {
+            this.soundChannel.stop();
+          }
+          this.soundChannel = this.play(nMsecOffset, nLoops); // start playing at new position
+          this.addEventListener(Event.SOUND_COMPLETE, _onfinish);
+          this.applyTransform();
+        }
       }
+
+      // if soundChannel is null (and not a netStream), there is no sound card (or 32-channel ceiling has been hit.)
+      // http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/media/Sound.html#play%28%29
+      return (!this.useNetstream && this.soundChannel === null ? false : true);
 
     }
 
@@ -434,13 +488,15 @@ package {
       // @see http://www.actionscript.org/forums/archive/index.php3/t-159194.html
       if (e.info.code == "NetStream.Play.Stop") {
 
-        if (!this.useNetstream) {
-          // finished playing
-          // this.didFinish = true; // will be reset via JS callback
+        if (!this.finished && (!this.useNetstream || !this.serverUrl)) {
+
+          // finished playing, and not RTMP
           writeDebug('calling onfinish for a sound');
           // reset the sound? Move back to position 0?
           this.sm.checkProgress();
+          this.finished = true; // will be reset via JS callback
           ExternalInterface.call(baseJSObject + "['" + this.sID + "']._onfinish");
+
         }
 
       } else if (e.info.code == "NetStream.Play.Start" || e.info.code == "NetStream.Buffer.Empty" || e.info.code == "NetStream.Buffer.Full") {
@@ -469,11 +525,11 @@ package {
         // However, if you pause and let the whole song buffer, Buffer.Flush is called followed by
         // Buffer.Empty, so handle that case too.
         //
-        // Ignore this event if we are more than 5 seconds from the end of the song.
+        // Ignore this event if we are more than 3 seconds from the end of the song.
         if (e.info.code == "NetStream.Buffer.Empty" && (this.lastNetStatus == 'NetStream.Play.Stop' || this.lastNetStatus == 'NetStream.Buffer.Flush')) {
-          if (this.duration && (this.ns.time * 1000) < (this.duration - 5000)) {
+          if (this.duration && (this.ns.time * 1000) < (this.duration - 3000)) {
             writeDebug('Ignoring Buffer.Empty because this is too early to be the end of the stream! (sID: '+this.sID+', time: '+(this.ns.time*1000)+', duration: '+this.duration+')');
-          } else {
+          } else if (!this.finished) {
             this.finished = true;
             writeDebug('calling onfinish for sound '+this.sID);
             this.sm.checkProgress();

@@ -1,5 +1,7 @@
 /* SoundManager 2 - project home utility JS */
 
+var IS_CHRISTMAS = (document.domain.match(/schillmania.com/i) && new Date().getMonth() == 11) || window.location.toString().match(/christmas/i);
+
 function _id(sID) {
   return document.getElementById(sID);
 }
@@ -21,6 +23,13 @@ function init() {
     if ((i+1)%2==0) {
   	  utils.addClass(el[i],'alt');
     }
+  }
+  var newCSS;
+  if (IS_CHRISTMAS) {
+    // overflow-x: hidden hack for homepage during christmas light season (so explosion fragments don't cause horizontal scrollbars.)
+    var newCSS = document.body.className.split(' ');
+    newCSS.push('has-lights');
+    document.body.className = newCSS.join(' ');
   }
 }
 
@@ -167,6 +176,9 @@ function setFilter(e,sFilterPrefix) {
   }
   var isClear = (lastSelected && lastSelected == o && utils.hasClass(lastSelected,'active'));
   if (oName == 'li' && isClear) {
+    if (typeof e.preventDefault !== 'undefined') {
+      e.preventDefault();
+    }
     return resetFilter();
   }
   if (oName == 'li') {
@@ -219,6 +231,9 @@ function setFilter(e,sFilterPrefix) {
       utils.addClass(o,'active');
     }
     lastSelected = o;
+    if (typeof e.preventDefault !== 'undefined') {
+      e.preventDefault();
+    }
     // cancel bubble, too?
     return false;
   }
@@ -264,6 +279,7 @@ function loadScript(sURL,onLoad) {
 }
 
 function doAltShortcuts() {
+/*
   var o = _id('shortcuts-list');
   if (!o) {
     return false;	
@@ -282,6 +298,7 @@ function doAltShortcuts() {
 	  utils.addClass(oLIs[i],'alt');
 	}
   }
+*/
 }
 
 function fixLinks() {
@@ -339,15 +356,16 @@ function doVersion() {
 }
 
 function doChristmasLights() {
-  if ((document.domain.match(/schillmania.com/i) && new Date().getMonth() == 11) || window.location.toString().match(/christmas/i)) {
-    loadScript('http://yui.yahooapis.com/combo?2.6.0/build/yahoo-dom-event/yahoo-dom-event.js&2.6.0/build/animation/animation-min.js',function(){
-      loadScript('demo/christmas-lights/christmaslights-home.js',function(){
-        if (typeof smashInit != 'undefined') {
-          setTimeout(function() {
-            smashInit()
-          },20);
-        }
-      });
+  if (IS_CHRISTMAS) {
+    // homepage overrides
+    window.XLSF_URL_BASE = 'demo/christmas-lights/';
+    window.XLSF_LIGHT_CLASS = 'pico';
+    loadScript('demo/christmas-lights/christmaslights.js',function(){
+      if (typeof smashInit != 'undefined') {
+        setTimeout(function() {
+          smashInit()
+        },20);
+      }
     });
   }
 }
@@ -356,26 +374,27 @@ function doChristmasLights() {
 
 if (window.is_home) {
 
-	// by default, enable native audio (with all its potential caveats.)
-	soundManager.useHTML5Audio = true;
+    // by default, enable native audio (with all its potential caveats.)
+    soundManager.useHTML5Audio = true;
 
-    // even if HTML5 supports MP3, prefer flash so the visualization features can be used.
-    soundManager.preferFlash = true;
+    // URL overrides for demo/testing..
+    if (document.location.href.match(/sm2-usehtml5audio=1/i)) {
+      soundManager.useHTML5Audio = true; // w00t.
+    } else if (document.location.href.match(/sm2-usehtml5audio=0/i)) {
+      soundManager.useHTML5Audio = false;
+    }
 
-	// URL overrides for demo/testing..
-	if (document.location.href.match(/sm2-usehtml5audio=1/i)) {
-	  soundManager.useHTML5Audio = true; // w00t.
-	} else if (document.location.href.match(/sm2-usehtml5audio=0/i)) {
-	  soundManager.useHTML5Audio = false;
-	}
-
-	soundManager.useFlashBlock = true;
-	soundManager.useHighPerformance = true;
-	soundManager.useFastPolling = true;
-	soundManager.bgColor = '#ffffff';
-	soundManager.debugMode = false;
-	soundManager.url = 'swf/';
-	soundManager.wmode = 'transparent'; // hide initial flash of white on everything except firefox, IE 8 and Safari on Windoze
+    soundManager.setup({
+      // even if HTML5 supports MP3, prefer flash so the visualization features can be used.
+      preferFlash: true,
+      useFlashBlock: true,
+      useHighPerformance: true,
+      bgColor: '#ffffff',
+      debugMode: false,
+      url: 'swf/',
+      // hide initial flash of white on everything except firefox, IE 8 and Safari on Windoze
+      wmode: 'transparent'
+    });
 
 	var PP_CONFIG = {
 	  autoStart: false,      // begin playing first sound when page loads
@@ -384,8 +403,7 @@ if (window.is_home) {
 	  usePeakData: true,     // [Flash 9 only] whether or not to show peak data (left/right channel values) - nor noticable on CPU
 	  useWaveformData: false,// [Flash 9 only] show raw waveform data - WARNING: LIKELY VERY CPU-HEAVY
 	  useEQData: false,      // [Flash 9 only] show EQ (frequency spectrum) data
-	  useFavIcon: false,     // try to apply peakData to address bar (Firefox + Opera) - performance note: appears to make Firefox 3 do some temporary, heavy disk access/swapping/garbage collection at first(?) - may be too heavy on CPU
-	  useMovieStar: true     // Flash 9.0r115+ only: Support for a subset of MPEG4 formats.
+	  useFavIcon: false     // try to apply peakData to address bar (Firefox + Opera) - performance note: appears to make Firefox 3 do some temporary, heavy disk access/swapping/garbage collection at first(?) - may be too heavy on CPU
 	}
 
 	threeSixtyPlayer.config = {
@@ -398,6 +416,7 @@ if (window.is_home) {
 	  backgroundRingColor: '#eee',
 	  circleDiameter: 256,
 	  circleRadius: 128,
+	  scaleArcWidth: 1,
 	  animDuration: 500,
 	  animTransition: Animator.tx.bouncy,
 	  showHMSTime: true,
@@ -429,8 +448,6 @@ if (window.is_home) {
 	  soundManager.useHighPerformance = false;
 	}
 
-	soundManager.useFastPolling = true;
-
 	function checkBadSafari() {
 	  var _ua = navigator.userAgent;
 	  if (!document.location.href.match(/sm2-usehtml5audio/i) && !window.location.toString().match(/sm2\-ignorebadua/i) && _ua.match(/safari/i) && !_ua.match(/chrome/i) && _ua.match(/OS X 10_6_([3-7])/i)) { // Safari 4 and 5 occasionally fail to load/play HTML5 audio on Snow Leopard due to bug(s) in QuickTime X and/or other underlying frameworks. :/ Known Apple "radar" bug. https://bugs.webkit.org/show_bug.cgi?id=32159
@@ -454,31 +471,32 @@ if (window.is_home) {
 
 	  doChristmasLights();
 
-    // hat tip: Flash Detect library (BSD, (C) 2007) by Carl "DocYes" S. Yestrau - http://featureblend.com/javascript-flash-detection-library.html / http://featureblend.com/license.txt
+      // hat tip: Flash Detect library (BSD, (C) 2007) by Carl "DocYes" S. Yestrau - http://featureblend.com/javascript-flash-detection-library.html / http://featureblend.com/license.txt
 
-    var _hasFlash;
-    var hasPlugin = false, n = navigator, nP = n.plugins, obj, type, types, AX = window.ActiveXObject;
+      var _hasFlash;
+      var hasPlugin = false, n = navigator, nP = n.plugins, obj, type, types, AX = window.ActiveXObject;
 
-    if (nP && nP.length) {
+      if (nP && nP.length) {
 
-      type = 'application/x-shockwave-flash';
-      types = n.mimeTypes;
-      if (types && types[type] && types[type].enabledPlugin && types[type].enabledPlugin.description) {
-        hasPlugin = true;
-      }
+        type = 'application/x-shockwave-flash';
+        types = n.mimeTypes;
 
-    } else if (typeof AX !== 'undefined') {
+        if (types && types[type] && types[type].enabledPlugin && types[type].enabledPlugin.description) {
+          hasPlugin = true;
+        }
 
-      try {
-        obj = new AX('ShockwaveFlash.ShockwaveFlash');
-      } catch(e) {
-        // oh well
-      }
-      hasPlugin = (!!obj);
+      } else if (typeof AX !== 'undefined') {
 
-    }
+        try {
+          obj = new AX('ShockwaveFlash.ShockwaveFlash');
+        } catch(e) {
+          // oh well
+        }
+        hasPlugin = (!!obj);
 
-    _hasFlash = hasPlugin;
+        }
+
+      _hasFlash = hasPlugin;
 
 	  // if using HTML5, show some additional format support info
 	  // written while watching The Big Lebowski for the Nth time. Donny, you're out of your element!
@@ -522,7 +540,7 @@ if (window.is_home) {
 	  checkBadSafari();
 
 	  // check inline player / HTML 5 bits
-	  var items = _id('muxtape-html5').getElementsByTagName('a');
+	  var items = utils.getElementsByClassName('muxtape-html5', 'a', _id('inline-playlist'));
 	  for (var i = 0, j = items.length; i < j; i++) {
 	    if (!soundManager.canPlayLink(items[i])) {
 	      items[i].className += ' not-supported';
@@ -543,7 +561,7 @@ if (window.is_home) {
 
 	  var o = _id('sm2-support');
 	  var o2 = _id('sm2-support-warning');
-	  var smLoadFailWarning = '<div style="margin:0.5em;margin-top:-0.25em"><h3>Oh snap!</h3><p>' + (soundManager.hasHTML5 ? 'The flash portion of ' : '') + 'SoundManager 2 was unable to start. ' + (soundManager.useHTML5Audio ? (soundManager.hasHTML5 ? '</p><p>Some HTML5 audio support is present, but flash is needed for MP3/MP4 support on this page.' : '</p><p>No HTML5 support was found, so flash is required.') : '' ) + '</p><p>All links to audio will degrade gracefully.</p><p id="flashblocker">If you have a flash blocker, try allowing the SWF to run - it may be visible above.</p><p id="flash-offline">' + (soundManager.useAltURL ? '<b>Viewing offline</b>? You may need to change a Flash security setting.' : 'Other possible causes: Missing .SWF, or no Flash?') + ' Not to worry, as guided help is provided.</p><p><a href="doc/getstarted/index.html#troubleshooting" class="feature-hot" style="display:inline-block;margin-left:0px">Troubleshooting</a></p></div>';
+	  var smLoadFailWarning = '<div style="margin:0.5em;margin-top:-0.25em"><h3>Oh snap!</h3><p>' + (soundManager.hasHTML5 ? 'The flash portion of ' : '') + 'SoundManager 2 was unable to start. ' + (soundManager.useHTML5Audio ? (soundManager.hasHTML5 ? '</p><p>Some HTML5 audio support is present, but flash is needed for MP3/MP4 support on this page.' : '</p><p>No HTML5 support was found, so flash is required.') : '' ) + '</p><p>All links to audio will degrade gracefully.</p><p id="flashblocker">If you have a flash blocker, try allowing the SWF to run - it may be visible below.</p><p id="flash-offline">' + (soundManager.useAltURL ? '<b>Viewing offline</b>? You may need to change a Flash security setting.' : 'Other possible causes: Missing .SWF, or no Flash?') + ' Not to worry, as guided help is provided.</p><p><a href="doc/getstarted/index.html#troubleshooting" class="feature-hot" style="display:inline-block;margin-left:0px">Troubleshooting</a></p></div>';
 	  var hatesFlash = (navigator.userAgent.match(/(ipad|iphone|ipod)/i));
 
       if (soundManager.html5.mp3 && soundManager.html5.mp4) {
@@ -564,7 +582,7 @@ if (window.is_home) {
       }
 
 	  o.innerHTML = smLoadFailWarning;
-	  o2.innerHTML = '<p style="margin:0px">SoundManager 2 could not start. <a href="#inline-demos">See below</a> for details.</p>';
+	  o2.innerHTML = '<p style="margin:0px">SoundManager 2 could not start. <a href="#sm2-support">See below</a> for details.</p>';
 	  if (hatesFlash || soundManager.getMoviePercent()) {
 	    // movie loaded at least somewhat, so don't show flashblock things
 	    _id('flashblocker').style.display = 'none';
